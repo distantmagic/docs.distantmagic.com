@@ -1,24 +1,46 @@
-define FOREACH
-	for DIR in packages/*; do \
-		if [ -d $$DIR ]; then \
-			echo $$DIR; \
-			$(MAKE) -C $$DIR $(1); \
-		fi \
-	done
-endef
+# Targets
 
-node_modules yarn.lock: package.json packages/*/package.json
+node_modules yarn.lock: package.json
 	yarn install
 
-.PHONY: prettier
-prettier: node_modules
-	$(call FOREACH,prettier)
+# Phony targets
+
+.PHONY: build
+build: node_modules
+	yarn run docusaurus build
 
 .PHONY: clean
-clean:
-	$(call FOREACH,clean)
-	rm -rf node_modules
+clean: node_modules
+	yarn run docusaurus clear
+	rm -rf ./node_modules
+
+.PHONY: deploy
+deploy: node_modules
+	yarn run docusaurus deploy
+
+.PHONY: docusaurus
+docusaurus: node_modules
+	yarn run docusaurus
 
 .PHONY: release
-release: node_modules
-	$(MAKE) -C packages/website release
+release: build
+
+.PHONY: serve
+serve: node_modules
+	yarn run docusaurus serve
+
+.PHONY: start
+start: node_modules
+	yarn run docusaurus start --no-open --host 0.0.0.0
+
+.PHONY: swizzle
+swizzle: node_modules
+	yarn run docusaurus swizzle
+
+.PHONY: write-heading-ids
+write-heading-ids: node_modules
+	yarn run docusaurus write-heading-id
+
+.PHONY: write-translations
+write-translations: node_modules
+	yarn run docusaurus write-translations
